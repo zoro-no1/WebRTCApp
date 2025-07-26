@@ -22,7 +22,6 @@ io.on("connection", (socket: Socket) => {
   io.emit("allUser", allSocket);
 
   socket.on("createOffer", (data) => {
-    console.log("create offer ", data);
     io.to(data.receiverId).emit("offer", { offer: data.offer, from: socket.id });
   });
 
@@ -31,8 +30,6 @@ io.on("connection", (socket: Socket) => {
     io.to(data.receiverId).emit("answer", { myId: socket.id, offer: data.offer });
   });
   socket.on("iceCandidate",(data)=>{
-    console.log(data);
-    
     io.to(data.receiver).emit("iceCandidate",data)
   })
 

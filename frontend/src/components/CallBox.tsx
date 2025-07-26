@@ -11,6 +11,12 @@ const CallBox = () => {
 const setAllUser=Sender(state=>state.setAllUser)
 const receiver =Sender(s=>s.receiver)
 const setReceiver =Sender(s=>s.setReceiver)
+const remoteVideoRef=useRef<HTMLVideoElement>(null)
+
+
+
+
+
   useEffect(() => {
     // Get user media
     navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then((stream) => {
@@ -33,6 +39,16 @@ const setReceiver =Sender(s=>s.setReceiver)
       console.log("Received offer, sending answer...");
       const pc = new RTCPeerConnection();
       pcRef.current = pc;
+      
+  const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false})
+      pc.addTrack(stream.getVideoTracks()[0])
+       pc.ontrack = (event) => {
+          console.log("Remote track event:", event);
+        if(remoteVideoRef.current){
+          remoteVideoRef.current.srcObject= new MediaStream([event.track])
+        }
+        
+        }
 
         await pc.setRemoteDescription(data.offer);
         const answer = await pc.createAnswer();
@@ -41,32 +57,20 @@ const setReceiver =Sender(s=>s.setReceiver)
       
       setReceiver(data.from);
 
-      pc.onicecandidate = (event) => {
-        console.log("event",event);
-        
+      pc.onicecandidate = (event) => { 
         
         if (event.candidate) {
           socketInstance.emit("iceCandidate", { candidate: event.candidate, receiver: data.from });
         }
       };
-
-      socket?.on("iceCandidate", (data) => {
-        console.log("ice ",data);
-        
-  
-          pc.addIceCandidate(data.candidate);
+       socketInstance.on("iceCandidate", (data) => {
+          pcRef.current?.addIceCandidate(data.candidate);
         
       });
-       const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false})
-      pc.addTrack(stream.getVideoTracks()[0])
-      console.log(stream.getVideoTracks()[0]);
-      
-
-      pc.ontrack = (track) => {
-        console.log("Remote track event:", track);
-        // You can add a remote video ref and set srcObject here if needed
-      };
     });
+     
+    
+   
 
     // Cleanup on unmount
     return () => {
@@ -89,42 +93,47 @@ const setReceiver =Sender(s=>s.setReceiver)
 
   
 
-  async function handelCall() {
+  async function handleCall() {
     if (!socket) return;
     const pc = new RTCPeerConnection();
-    pc.onnegotiationneeded=async()=>{
-      console.log("is");
-      
-      pcRef.current = pc;
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      socket.emit("createOffer", { offer, receiverId:receiver });
-    }
-    pc.onicecandidate=(event)=>{
-      console.log("event  ",event);
+      const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false})
+
+
+      pc.onicecandidate=(event)=>{
       
       if(event.candidate){
         socket.emit("iceCandidate",{candidate:event.candidate,receiver})
       }
     }
+      pc.addTrack(stream.getVideoTracks()[0])
+      console.log(stream);
+      
+    pc.ontrack=(event)=>{
+      console.log("track",event);
+      if(remoteVideoRef.current){
+        remoteVideoRef.current.srcObject=new MediaStream([event.track])
+      }
+    }
+
+    pc.onnegotiationneeded=async()=>{
+
+      pcRef.current = pc;
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      socket.emit("createOffer", { offer, receiverId:receiver });
+    }
     socket.on("iceCandidate",data=>{
-      console.log("ice",data);
       
       pc.addIceCandidate(data.candidate)
     })
+   
+      
+
 
     socket.on("answer", async (data) => {
       await pc.setRemoteDescription(data.offer);
     });
-      const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false})
-      console.log(stream.getVideoTracks()[0]);
-      
-      pc.addTrack(stream.getVideoTracks()[0])
-
-    pc.ontrack=(track)=>{
-      console.log(track);
-      
-    }
+    
   }
 
   return (
@@ -136,7 +145,14 @@ const setReceiver =Sender(s=>s.setReceiver)
         className="w-1/2"
         style={{ transform: "scaleX(-1)" }}
       />
-      {receiver&&<Button onClick={handelCall} className=" " variant={"destructive"}>call</Button>}
+      <video
+        ref={remoteVideoRef}
+        autoPlay
+        playsInline
+        className="w-1/2"
+        style={{ transform: "scaleX(-1)" }}
+      />
+      {receiver&&<Button onClick={handleCall} className=" " variant={"destructive"}>call</Button>}
     </div>
   );
 };
