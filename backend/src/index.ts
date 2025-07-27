@@ -25,7 +25,7 @@ io.on("connection", (socket: Socket) => {
 
 
   socket.on("createOffer", (data) => {
-    io.to(data.receiverId).emit("offer", { offer: data.offer, from: socket.id });
+    io.to(data.receiverId).emit("offer", { offer: data.offer, from: socket.id ,receiverName:data.receiverName});
   });
 
   socket.on("answer", (data) => {
@@ -33,6 +33,9 @@ io.on("connection", (socket: Socket) => {
   });
   socket.on("iceCandidate",(data)=>{
     io.to(data.receiver).emit("iceCandidate",data)
+  })
+  socket.on("cutCall",(data)=>{
+    io.to(data).emit("endCall")
   })
 
   socket.on("disconnect", () => {

@@ -13,7 +13,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ user, nav }) => {
   const [open, setOpen] = useState(false);
-  const setReceiver= Sender(state=>state.setReceiver)
+  const {setReceiver,setReceiverName}= Sender()
 
   return (
     <>
@@ -50,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, nav }) => {
             <a
               key={item.id}
               className="block px-4 py-2 rounded hover:bg-gray-800 transition"
-              onClick={() => {setOpen(false); setReceiver(item.id)}}
+              onClick={() => {setOpen(false); setReceiver(item.id); setReceiverName(item.name)}}
             >
               {item.name}
             </a>
