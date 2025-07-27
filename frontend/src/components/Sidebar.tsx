@@ -1,21 +1,17 @@
 import Sender from "@/utils/Sender";
 import React, { useState } from "react";
 
-type User = {
-  name: string;
-  email: string;
-  avatarUrl?: string;
-};
+
 
 
 
 interface SidebarProps {
-  user: User;
-  nav: string[];
-  onLogout?: () => void;
+  user:string;
+  nav: {name:string,id:string}[];
+
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ user, nav, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ user, nav }) => {
   const [open, setOpen] = useState(false);
   const setReceiver= Sender(state=>state.setReceiver)
 
@@ -43,31 +39,24 @@ const Sidebar: React.FC<SidebarProps> = ({ user, nav, onLogout }) => {
         style={{ height: "100vh" }}
       >
         <div className="flex items-center gap-4 mb-8">
-          {user.avatarUrl && (
-            <img src={user.avatarUrl} alt={user.name} className="w-14 h-14 rounded-full object-cover border-2 border-gray-700" />
-          )}
+         
           <div>
-            <div className="font-bold">{user.name}</div>
-            <div className="text-sm text-gray-400">{user.email}</div>
+            <div className="font-bold">{user}</div>
+          
           </div>
         </div>
         <nav className="flex-1 space-y-2">
           {nav.map(item => (
             <a
-              key={item}
+              key={item.id}
               className="block px-4 py-2 rounded hover:bg-gray-800 transition"
-              onClick={() => {setOpen(false); setReceiver(item)}}
+              onClick={() => {setOpen(false); setReceiver(item.id)}}
             >
-              {item}
+              {item.name}
             </a>
           ))}
         </nav>
-        <button
-          onClick={onLogout}
-          className="mt-8 bg-red-600 hover:bg-red-700 text-white rounded py-2 font-semibold transition"
-        >
-          Logout
-        </button>
+       
       </aside>
 
       {/* Overlay for mobile */}

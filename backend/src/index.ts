@@ -11,22 +11,24 @@ const io = new Server(server, {
   }
 });
 
-let allSocket: string[] = [];
+let allSocket: {name:string,id:string}[] = [];
 
 io.on("connection", (socket: Socket) => {
   console.log("server is connected", socket.id);
-  allSocket.push(socket.id);
-  console.log(allSocket.length);
+  
+  socket.on("setName",date=>{
+    console.log(date);
+    allSocket.push({name:date,id:socket.id});
+    io.emit("allUser", allSocket);
+    console.log(allSocket);
+  })
 
-  // Send updated user list to all clients
-  io.emit("allUser", allSocket);
 
   socket.on("createOffer", (data) => {
     io.to(data.receiverId).emit("offer", { offer: data.offer, from: socket.id });
   });
 
   socket.on("answer", (data) => {
-    console.log("answer ", data);
     io.to(data.receiverId).emit("answer", { myId: socket.id, offer: data.offer });
   });
   socket.on("iceCandidate",(data)=>{
@@ -34,7 +36,7 @@ io.on("connection", (socket: Socket) => {
   })
 
   socket.on("disconnect", () => {
-    allSocket = allSocket.filter(e => e !== socket.id);
+    allSocket = allSocket.filter(e => e.id !== socket.id);
     // Update all clients after disconnect
     io.emit("allUser", allSocket);
     console.log("Disconnected", socket.id);

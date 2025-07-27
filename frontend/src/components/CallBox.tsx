@@ -8,9 +8,7 @@ const CallBox = () => {
   const myVideo = useRef<HTMLVideoElement | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
-const setAllUser=Sender(state=>state.setAllUser)
-const receiver =Sender(s=>s.receiver)
-const setReceiver =Sender(s=>s.setReceiver)
+const {setAllUser,receiver,setReceiver,name}=Sender()
 const remoteVideoRef=useRef<HTMLVideoElement>(null)
 
 
@@ -29,7 +27,9 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     const socketInstance = io("ws://localhost:8000");
     setSocket(socketInstance);
 
-    socketInstance.on("allUser", (data: string[]) => {
+    socketInstance.emit("setName",name)
+
+    socketInstance.on("allUser", (data:{name:string,id:string}[]) => {
 
       setAllUser(data);
     });
@@ -136,24 +136,31 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     
   }
 
+
   return (
-    <div className="w-full h-screen bg-black flex items-center gap-2 ">
+    <div className="w-full h-screen bg-black">
+
+   
+    <div className="h-4/5 flex items-center gap-2 border-2">
       <video
         ref={myVideo}
         autoPlay
         playsInline
-        className="w-1/2"
+        className="w-1/2 h-full border"
         style={{ transform: "scaleX(-1)" }}
       />
-      <video
+      {remoteVideoRef&&<video
         ref={remoteVideoRef}
         autoPlay
         playsInline
-        className="w-1/2"
+        className="w-1/2 h-full border"
         style={{ transform: "scaleX(-1)" }}
-      />
-      {receiver&&<Button onClick={handleCall} className=" " variant={"destructive"}>call</Button>}
+      />}
     </div>
+    <div className="flex justify-center items-center">
+      <Button onClick={handleCall} className=" " variant={"destructive"}>call</Button>
+    </div>
+     </div>
   );
 };
 

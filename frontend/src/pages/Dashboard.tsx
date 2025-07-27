@@ -4,18 +4,15 @@ import Sender from "@/utils/Sender";
 
 
 const Dashboard = () => {
-  const allUser = Sender((state) => state.allUser)
-    const user = {
-    name: "Jane Doe",
-    email: "jane@example.com",
-    avatarUrl: "/avatars/jane.jpg"
-  };
+  const {allUser,name} = Sender()
+    
 
   const nav=allUser
   return (
     
     <div className="flex ">
-    {nav&&<Sidebar user={user} nav={nav} />}
+    
+    {(nav&&name)&& <Sidebar user={name} nav={nav} />}
       <CallBox/>
     </div>
   )
