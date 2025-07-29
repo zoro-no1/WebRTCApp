@@ -8,7 +8,7 @@ const CallBox = () => {
   const myVideo = useRef<HTMLVideoElement | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
-const {setAllUser,receiver,setReceiver,name,connect,setConnection,receiverName}=Sender()
+const {setAllUser,receiver,setReceiver,name,connect,setConnection,receiverName,setReceiverName}=Sender()
 const remoteVideoRef=useRef<HTMLVideoElement>(null)
 
 
@@ -149,6 +149,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     socket?.emit("cutCall",receiver)
     pcRef.current?.close()
     pcRef.current=null
+    setReceiverName(null)
  if (remoteVideoRef.current) {
     remoteVideoRef.current.srcObject = null;
   }
@@ -157,33 +158,61 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
 
 
   return (
-    <div className="w-full h-screen bg-black">
+    <div className="relative w-full h-screen bg-black">
+  {/* Remote Video (in the background, full screen when connected) */}
+  <video
+    ref={remoteVideoRef}
+    autoPlay
+    playsInline
+    className={`w-full h-full object-cover ${connect ? "" : "hidden"}`}
+    style={{ transform: "scaleX(-1)" }}
+  />
 
-   
-    <div className="h-4/5 flex items-center gap-2 border-2">
-      <video
-        ref={myVideo}
-        autoPlay
-        playsInline
-        className="w-1/2 h-full border"
-        style={{ transform: "scaleX(-1)" }}
-      />
-      <h1 className={`${!connect?"":"hidden"} text-8xl text-white text-center w-full`}>
-        {receiverName}
+  {/* My Video (initially full screen, becomes PiP when connected) */}
+  <video
+    ref={myVideo}
+    autoPlay
+    playsInline
+    muted // It's good practice to mute your own video to prevent feedback
+    className={`
+      transition-all duration-300 ease-in-out
+      ${
+        connect
+          ? "absolute top-4 right-4 w-1/4 max-w-[250px] h-auto rounded-lg border-2 border-white z-10"
+          : "w-full h-full object-cover"
+      }
+    `}
+    style={{ transform: "scaleX(-1)" }}
+  />
+
+  {/* Call Invitation Text (shown before connection) */}
+  {!connect && receiverName && (
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+      <h1 className="text-5xl text-white text-center">
+       {receiverName}
       </h1>
-      <video
-        ref={remoteVideoRef}
-        autoPlay
-        playsInline
-        className={`w-1/2 h-full border ${connect?'':"hidden"}`}
-        style={{ transform: "scaleX(-1)" }}
-      />
     </div>
-    <div className="flex justify-center items-center">
-     <Button onClick={handleCall} className={`${receiver&&!connect?"":"hidden"} bg-green-500`} >call</Button>
-     <Button variant={"destructive"} size={"default"} onClick={handleCut} className={`${connect?"":"hidden"}`}>cut</Button>
-    </div>
-     </div>
+  )}
+
+  {/* Call Control Buttons */}
+  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
+    <Button
+      onClick={handleCall}
+      className={`${receiver && !connect ? "" : "hidden"} bg-green-500 hover:bg-green-600`}
+    >
+      Call
+    </Button>
+    <Button
+      variant={"destructive"}
+      size={"default"}
+      onClick={handleCut}
+      className={`${connect ? "" : "hidden"}`}
+    >
+      Cut Call
+    </Button>
+  </div>
+</div>
+
   );
 };
 

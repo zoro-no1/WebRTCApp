@@ -12,7 +12,7 @@ type sender = {
     connect:boolean
     setConnection:(value:boolean)=>void
     receiverName:string|null
-    setReceiverName:(value:string)=>void
+    setReceiverName:(value:string|null)=>void
 
 }
 const Sender=create<sender>((set)=>({
