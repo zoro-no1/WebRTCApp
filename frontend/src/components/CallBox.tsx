@@ -178,7 +178,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
       transition-all duration-300 ease-in-out
       ${
         connect
-          ? "absolute top-4 right-4 w-1/4 max-w-[250px] h-auto rounded-lg border-2 border-white z-10"
+          ? "absolute top-4 right-4 w-1/4 max-w-[250px] h-auto rounded-4xl border-2 border-white z-10"
           : "w-full h-full object-cover"
       }
     `}
