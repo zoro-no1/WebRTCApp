@@ -132,7 +132,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
       pcRef.current = pc;
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      socket.emit("createOffer", { offer, receiverId:receiver,receiverName });
+      socket.emit("createOffer", { offer, receiverId:receiver,receiverName:name });
     }
     socket.on("iceCandidate",data=>{
       
@@ -154,6 +154,14 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     remoteVideoRef.current.srcObject = null;
   }
   setConnection(false)
+  }
+  async function startScreen(){
+    const screen=await navigator.mediaDevices.getDisplayMedia({video:true})
+    pcRef.current?.addTrack(screen.getTracks()[0])
+    if(myVideo.current){
+      myVideo.current.srcObject=screen
+      myVideo.current.play()
+    }
   }
 
 
@@ -209,6 +217,14 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
       className={`${connect ? "" : "hidden"}`}
     >
       Cut Call
+    </Button>
+    <Button
+      variant={"destructive"}
+      size={"default"}
+      onClick={startScreen}
+      className={`${connect ? "" : "hidden"}`}
+    >
+      screen share
     </Button>
   </div>
 </div>

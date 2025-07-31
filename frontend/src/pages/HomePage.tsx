@@ -135,7 +135,7 @@ const LandingPage = () => {
         }}
       >
         <div className="grid md:grid-cols-3 gap-6">
-          {features.map((feature, idx) => (
+          {features.map((feature) => (
             <motion.div
               key={feature.title}
               variants={{

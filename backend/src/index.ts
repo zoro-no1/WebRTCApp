@@ -25,6 +25,7 @@ io.on("connection", (socket: Socket) => {
 
 
   socket.on("createOffer", (data) => {
+    
     io.to(data.receiverId).emit("offer", { offer: data.offer, from: socket.id ,receiverName:data.receiverName});
   });
 
