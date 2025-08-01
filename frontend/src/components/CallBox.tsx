@@ -30,8 +30,9 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
     socketInstance.emit("setName",name)
 
     socketInstance.on("allUser", (data:{name:string,id:string}[]) => {
-
-      setAllUser(data);
+      console.log(socketInstance.id);
+      
+      setAllUser(data.filter(e=>e.id!==socketInstance.id));
     });
 
     // Listen for offer
@@ -47,6 +48,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
           console.log("Remote track event:", event);
         if(remoteVideoRef.current){
           remoteVideoRef.current.srcObject= new MediaStream([event.track])
+          remoteVideoRef.current.play()
           setConnection(true)
         }
         }
@@ -117,7 +119,7 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
       
     }
       pc.addTrack(stream.getVideoTracks()[0])
-      console.log(stream);
+      console.log(pc);
       
     pc.ontrack=(event)=>{
       console.log("track",event);
@@ -162,6 +164,12 @@ const remoteVideoRef=useRef<HTMLVideoElement>(null)
       myVideo.current.srcObject=screen
       myVideo.current.play()
     }
+    if(pcRef.current&&socket){
+      pcRef.current.onnegotiationneeded=async()=>{
+      const offer = await pcRef.current?.createOffer();
+      await pcRef.current?.setLocalDescription(offer);
+      socket.emit("createOffer", { offer, receiverId:receiver,receiverName:name });
+    }}
   }
 
 

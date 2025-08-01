@@ -1,8 +1,8 @@
 import {create} from "zustand"
-
+import {  Socket } from "socket.io-client"
 
 type sender = {
-    mySocket: WebSocket | null
+    mySocket: Socket | null
     name: string | null
     receiver:string|null
     allUser: {name:string,id:string}[] | null

@@ -17,10 +17,8 @@ io.on("connection", (socket: Socket) => {
   console.log("server is connected", socket.id);
   
   socket.on("setName",date=>{
-    console.log(date);
     allSocket.push({name:date,id:socket.id});
     io.emit("allUser", allSocket);
-    console.log(allSocket);
   })
 
 
